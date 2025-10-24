@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionTitle: {
+    
     fontSize: 18,
     fontWeight: '500',
     color: '#1F2937',
