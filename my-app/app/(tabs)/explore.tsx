@@ -1,13 +1,69 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddChildScreen() {
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState('');
   const [childDescription, setChildDescription] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
+  const [childPhoto, setChildPhoto] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    // Request permission
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+      return;
+    }
+
+    // Show action sheet for camera or gallery
+    Alert.alert(
+      'Select Photo',
+      'Choose an option',
+      [
+        { text: 'Camera', onPress: () => openCamera() },
+        { text: 'Gallery', onPress: () => openGallery() },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const openCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission Required', 'Permission to access camera is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setChildPhoto(result.assets[0].uri);
+    }
+  };
+
+  const openGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setChildPhoto(result.assets[0].uri);
+    }
+  };
 
   const handleSaveChild = () => {
     if (!childName || !childAge) {
@@ -27,6 +83,7 @@ export default function AddChildScreen() {
     setChildAge('');
     setChildDescription('');
     setEmergencyContact('');
+    setChildPhoto(null);
   };
 
   return (
@@ -46,10 +103,16 @@ export default function AddChildScreen() {
         <View style={styles.card}>
           <View style={styles.avatarSection}>
             <View style={styles.avatar}>
-              <MaterialIcons name="child-care" size={60} color="#3B82F6" />
+              {childPhoto ? (
+                <Image source={{ uri: childPhoto }} style={styles.photoImage} />
+              ) : (
+                <MaterialIcons name="child-care" size={60} color="#3B82F6" />
+              )}
             </View>
-            <TouchableOpacity style={styles.photoButton}>
-              <Text style={styles.photoButtonText}>Add Photo</Text>
+            <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+              <Text style={styles.photoButtonText}>
+                {childPhoto ? 'Change Photo' : 'Add Photo'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -247,6 +310,11 @@ const styles = StyleSheet.create({
   photoButtonText: {
     color: 'white',
     fontWeight: '500',
+  },
+  photoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 64,
   },
   formSection: {
     gap: 16,

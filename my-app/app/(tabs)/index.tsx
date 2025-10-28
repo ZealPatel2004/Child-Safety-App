@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 
 export default function HomeScreen() {
   const handleCall911 = () => {
@@ -23,6 +24,26 @@ export default function HomeScreen() {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Call", onPress: () => Linking.openURL('tel:1-800-843-5678') }
+      ]
+    );
+  };
+
+  const navigateToAddChild = () => {
+    router.push('/(tabs)/explore');
+  };
+
+  const handleSafetyLocations = () => {
+    // Navigate to safety locations screen
+    router.push('/safety-locations');
+  };
+
+  const handleReportActivity = () => {
+    Alert.alert(
+      "Report Suspicious Activity",
+      "This feature will allow you to report suspicious activity to authorities. Would you like to call the police?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Call Police", onPress: () => Linking.openURL('tel:911') }
       ]
     );
   };
@@ -76,7 +97,7 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>Quick Actions</Text>
           
           <View style={styles.actionsList}>
-            <TouchableOpacity style={styles.actionItem}>
+            <TouchableOpacity style={styles.actionItem} onPress={navigateToAddChild}>
               <MaterialIcons name="child-care" size={28} color="#4F46E5" />
               <View style={styles.actionContent}>
                 <Text style={styles.actionTitle}>Add Child Profile</Text>
@@ -85,7 +106,7 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem}>
+            <TouchableOpacity style={styles.actionItem} onPress={handleSafetyLocations}>
               <MaterialIcons name="location-on" size={28} color="#EF4444" />
               <View style={styles.actionContent}>
                 <Text style={styles.actionTitle}>Safety Locations</Text>
@@ -94,7 +115,7 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem}>
+            <TouchableOpacity style={styles.actionItem} onPress={handleReportActivity}>
               <MaterialIcons name="report" size={28} color="#F59E0B" />
               <View style={styles.actionContent}>
                 <Text style={styles.actionTitle}>Report Suspicious Activity</Text>
