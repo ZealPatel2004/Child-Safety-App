@@ -48,6 +48,14 @@ export default function HomeScreen() {
     );
   };
 
+  const handleEmergencyContacts = () => {
+    router.push('/emergency-contacts');
+  };
+
+  const handlePanicButton = () => {
+    router.push('/panic-button');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -106,11 +114,29 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
+            <TouchableOpacity style={styles.actionItem} onPress={handleEmergencyContacts}>
+              <MaterialIcons name="contacts" size={28} color="#10B981" />
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>Emergency Contacts</Text>
+                <Text style={styles.actionSubtitle}>Manage trusted contacts</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.actionItem} onPress={handleSafetyLocations}>
               <MaterialIcons name="location-on" size={28} color="#EF4444" />
               <View style={styles.actionContent}>
                 <Text style={styles.actionTitle}>Safety Locations</Text>
                 <Text style={styles.actionSubtitle}>Find nearby safe places</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionItem} onPress={handlePanicButton}>
+              <MaterialIcons name="warning" size={28} color="#EF4444" />
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>Panic Button</Text>
+                <Text style={styles.actionSubtitle}>Emergency alert system</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
