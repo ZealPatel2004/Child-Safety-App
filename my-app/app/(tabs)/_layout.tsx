@@ -11,9 +11,22 @@ export default function TabLayout() {
 
   return (
     <Tabs
-    //this is the Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#A78BFA',
+        tabBarInactiveTintColor: '#64748B',
+        tabBarStyle: {
+          backgroundColor: '#1A1A2E',
+          borderTopColor: '#16213E',
+          borderTopWidth: 1,
+          height: 85,
+          paddingBottom: 10,
+          paddingTop: 10,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginTop: 4,
+        },
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
@@ -21,7 +34,13 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol 
+              size={focused ? 32 : 28} 
+              name="house.fill" 
+              color={focused ? '#A78BFA' : '#64748B'} 
+            />
+          ),
         }}
       />
       
@@ -29,7 +48,13 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Add Child',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.badge.plus" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol 
+              size={focused ? 32 : 28} 
+              name="person.badge.plus" 
+              color={focused ? '#A78BFA' : '#64748B'} 
+            />
+          ),
         }}
       />
     </Tabs>
