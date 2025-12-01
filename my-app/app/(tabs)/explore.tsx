@@ -165,6 +165,11 @@ export default function AddChildScreen() {
                 keyboardType="phone-pad"
                 style={styles.input}
               />
+              <View style={styles.addContactIconRow}>
+                <TouchableOpacity style={styles.addContactButton}>
+                  <Ionicons name="add" size={28} color="#3B82F6" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -178,9 +183,9 @@ export default function AddChildScreen() {
               <View style={styles.safetyContent}>
                 <MaterialIcons name="location-on" size={24} color="#EF4444" />
                 <Text style={styles.safetyText}>Enable Location Tracking</Text>
-              </View>
-              <View style={styles.toggleOn}>
-                <View style={styles.toggleIndicator} />
+                <View style={[styles.toggleOn, styles.toggleContainer]}>
+                  <View style={styles.toggleIndicator} />
+                </View>
               </View>
             </TouchableOpacity>
 
@@ -188,9 +193,9 @@ export default function AddChildScreen() {
               <View style={styles.safetyContent}>
                 <MaterialIcons name="notifications" size={24} color="#F59E0B" />
                 <Text style={styles.safetyText}>Emergency Alerts</Text>
-              </View>
-              <View style={styles.toggleOn}>
-                <View style={styles.toggleIndicator} />
+                <View style={[styles.toggleOn, styles.toggleContainer]}>
+                  <View style={styles.toggleIndicator} />
+                </View>
               </View>
             </TouchableOpacity>
 
@@ -198,9 +203,9 @@ export default function AddChildScreen() {
               <View style={styles.safetyContent}>
                 <MaterialIcons name="share" size={24} color="#10B981" />
                 <Text style={styles.safetyText}>Share with Authorities</Text>
-              </View>
-              <View style={styles.toggleOff}>
-                <View style={styles.toggleIndicatorOff} />
+                <View style={[styles.toggleOff, styles.toggleContainer]}>
+                  <View style={styles.toggleIndicatorOff} />
+                </View>
               </View>
             </TouchableOpacity>
           </View>
@@ -244,6 +249,31 @@ export default function AddChildScreen() {
 }
 
 const styles = StyleSheet.create({
+      addContactIconRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 8,
+        marginBottom: 4,
+      },
+    emergencyContactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    addContactButton: {
+      marginLeft: 8,
+      backgroundColor: '#E0E7FF',
+      borderRadius: 16,
+      padding: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#3B82F6',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 2,
+    },
   container: {
     flex: 1,
     backgroundColor: '#0F0F23',
@@ -371,25 +401,25 @@ const styles = StyleSheet.create({
   safetySection: {
     gap: 16,
   },
+  // ...existing code...
   safetyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#0F1419',
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#1E293B',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
   },
   safetyContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   safetyText: {
-    color: '#FFFFFF',
+    fontSize: 16,
+    color: '#374151',
     fontWeight: '600',
     marginLeft: 12,
-    fontSize: 15,
+    flex: 1,
   },
   toggleOn: {
     width: 52,
@@ -397,6 +427,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
     borderRadius: 14,
     justifyContent: 'center',
+    paddingRight: 2,
+  },
+  toggleContainer: {
+    minWidth: 56,
+    alignItems: 'flex-end',
+    marginLeft: 12,
     paddingRight: 2,
     shadowColor: '#10B981',
     shadowOffset: {

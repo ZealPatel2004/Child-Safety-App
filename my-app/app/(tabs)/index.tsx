@@ -56,6 +56,10 @@ export default function HomeScreen() {
     router.push('/panic-button');
   };
 
+  const handleCurfewMonitoring = () => {
+    router.push('/curfew-monitoring');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -137,6 +141,15 @@ export default function HomeScreen() {
               <View style={styles.actionContent}>
                 <Text style={styles.actionTitle}>Panic Button</Text>
                 <Text style={styles.actionSubtitle}>Emergency alert system</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionItem} onPress={handleCurfewMonitoring}>
+              <MaterialIcons name="schedule" size={28} color="#8B5CF6" />
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>Curfew & Time Away</Text>
+                <Text style={styles.actionSubtitle}>Monitor time away from home</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>

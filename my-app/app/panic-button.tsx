@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   panicButtonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: '800',
     marginTop: 12,
     textAlign: 'center',
