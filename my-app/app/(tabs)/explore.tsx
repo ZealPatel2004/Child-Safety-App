@@ -1,3 +1,134 @@
+// Onboarding Welcome Card Component
+function WelcomeCard({ onContinue }: { onContinue: () => void }) {
+  return (
+    <View style={welcomeStyles.cardContainer}>
+      <View style={welcomeStyles.iconCircle}>
+        <Ionicons name="rocket" size={48} color="#fff" />
+      </View>
+      <Text style={welcomeStyles.welcomeTitle}>Welcome to Apple Games</Text>
+      <View style={welcomeStyles.featureRow}>
+        <Ionicons name="star" size={24} color="#F87171" style={welcomeStyles.featureIcon} />
+        <View style={welcomeStyles.featureTextBlock}>
+          <Text style={welcomeStyles.featureTitle}>See What’s New, Just for You</Text>
+          <Text style={welcomeStyles.featureDesc}>Explore what is happening in your games and what to play next.</Text>
+        </View>
+      </View>
+      <View style={welcomeStyles.featureRow}>
+        <Ionicons name="people" size={24} color="#F87171" style={welcomeStyles.featureIcon} />
+        <View style={welcomeStyles.featureTextBlock}>
+          <Text style={welcomeStyles.featureTitle}>Play and Compete With Friends</Text>
+          <Text style={welcomeStyles.featureDesc}>Challenge friends, see what they are playing and play together.</Text>
+        </View>
+      </View>
+      <View style={welcomeStyles.featureRow}>
+        <Ionicons name="apps" size={24} color="#F87171" style={welcomeStyles.featureIcon} />
+        <View style={welcomeStyles.featureTextBlock}>
+          <Text style={welcomeStyles.featureTitle}>All Your Games in One Place</Text>
+          <Text style={welcomeStyles.featureDesc}>Access your full game library from the App Store and Apple Arcade.</Text>
+        </View>
+      </View>
+      <View style={welcomeStyles.infoRow}>
+        <Ionicons name="people" size={18} color="#F87171" style={{ marginRight: 6 }} />
+        <Text style={welcomeStyles.infoText}>
+          Your gameplay information, including what you play and your game activity, is used to improve Game Center. Your nickname, avatar, Arcade subscription status, scores, and other activity information you choose to share are visible to Game Center users. <Text style={welcomeStyles.infoLink}>See how your data is managed…</Text>
+        </Text>
+      </View>
+      <TouchableOpacity style={welcomeStyles.continueButton} onPress={onContinue}>
+        <Text style={welcomeStyles.continueButtonText}>Continue</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const welcomeStyles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#232325',
+    borderRadius: 32,
+    padding: 28,
+    margin: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  iconCircle: {
+    backgroundColor: '#F87171',
+    borderRadius: 20,
+    width: 64,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
+  },
+  welcomeTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginBottom: 18,
+    textAlign: 'center',
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    width: '100%',
+  },
+  featureIcon: {
+    marginTop: 2,
+    marginRight: 12,
+  },
+  featureTextBlock: {
+    flex: 1,
+  },
+  featureTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  featureDesc: {
+    color: '#D1D5DB',
+    fontSize: 13,
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 8,
+    marginBottom: 18,
+    width: '100%',
+  },
+  infoText: {
+    color: '#A1A1AA',
+    fontSize: 11,
+    flex: 1,
+  },
+  infoLink: {
+    color: '#F87171',
+    textDecorationLine: 'underline',
+  },
+  continueButton: {
+    backgroundColor: '#F87171',
+    borderRadius: 22,
+    paddingVertical: 12,
+    paddingHorizontal: 48,
+    marginTop: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  continueButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+});
+// Example usage: Show WelcomeCard at the top of the screen for demo
+// Remove or conditionally render as needed
+// ...existing code...
+// Inside your AddChildScreen return:
+// <WelcomeCard onContinue={() => {}} />
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
