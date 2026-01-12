@@ -1,4 +1,5 @@
 // Onboarding Welcome Card Component
+
 function WelcomeCard({ onContinue }: { onContinue: () => void }) {
   return (
     <View style={welcomeStyles.cardContainer}>
@@ -130,12 +131,36 @@ const welcomeStyles = StyleSheet.create({
 // Inside your AddChildScreen return:
 // <WelcomeCard onContinue={() => {}} />
 import React, { useState } from 'react';
+import { addChildProfile } from '../../addChildProfile';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function AddChildScreen() {
+    const handleAddChild = async () => {
+      if (!childName?.trim()) return alert("Please enter the child's full name");
+      if (!childAge || isNaN(Number(childAge))) return alert("Please enter a valid age");
+
+      try {
+        await addChildProfile({
+          fullName: childName,
+          age: Number(childAge),
+          physicalDescription: childDescription,
+          emergencyContactPhone: emergencyContact,
+          features: {
+            locationTrackingEnabled,
+            emergencyAlertsEnabled,
+            shareWithAuthorities,
+          },
+        });
+
+        alert("Child profile saved!");
+        // optional: clear form or navigate
+      } catch (e: any) {
+        alert(e?.message ?? "Failed to save child profile");
+      }
+    };
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState('');
   const [childDescription, setChildDescription] = useState('');
@@ -196,17 +221,35 @@ export default function AddChildScreen() {
     }
   };
 
-  const handleSaveChild = () => {
+  const [locationTrackingEnabled, setLocationTrackingEnabled] = useState(true);
+  const [emergencyAlertsEnabled, setEmergencyAlertsEnabled] = useState(true);
+  const [shareWithAuthorities, setShareWithAuthorities] = useState(false);
+
+  const handleSaveChild = async () => {
     if (!childName || !childAge) {
       Alert.alert('Error', 'Please fill in at least the name and age');
       return;
     }
-    
-    Alert.alert(
-      'Success',
-      `Child profile for ${childName} has been saved successfully!`,
-      [{ text: 'OK', onPress: () => clearForm() }]
-    );
+    try {
+      const id = await addChildProfile({
+        fullName: childName,
+        age: Number(childAge),
+        physicalDescription: childDescription,
+        emergencyContactPhone: emergencyContact,
+        features: {
+          locationTrackingEnabled,
+          emergencyAlertsEnabled,
+          shareWithAuthorities,
+        },
+      });
+      Alert.alert(
+        'Success',
+        `Child profile for ${childName} has been saved successfully!`,
+        [{ text: 'OK', onPress: () => clearForm() }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to save child profile');
+    }
   };
 
   const clearForm = () => {
@@ -345,7 +388,7 @@ export default function AddChildScreen() {
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity 
-            onPress={handleSaveChild}
+            onPress={handleAddChild}
             style={styles.saveButton}
           >
             <View style={styles.buttonContent}>
