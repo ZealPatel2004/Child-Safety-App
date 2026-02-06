@@ -15,7 +15,7 @@ export async function addChildProfile(params: {
   const user = auth.currentUser;
   if (!user) throw new Error("Not logged in");
 
-  const childRef = doc(collection(db, "users", user.uid, "children")); // auto-id
+  const childRef = doc(collection(db, "users", user.uid, "children"));
 
   await setDoc(childRef, {
     fullName: params.fullName.trim(),

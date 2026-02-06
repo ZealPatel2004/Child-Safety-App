@@ -12,10 +12,10 @@ export default function PanicButtonScreen() {
     if (isActivated) return;
 
     if (isSilentMode) {
-      // Silent panic - no confirmation dialog
+      
       executePanicProtocol();
     } else {
-      // Regular panic with confirmation
+      
       Alert.alert(
         "Panic Button Activated",
         "This will alert emergency contacts and authorities. Continue?",
@@ -34,10 +34,10 @@ export default function PanicButtonScreen() {
   const executePanicProtocol = () => {
     setIsActivated(true);
     
-    // Vibrate the device
+    
     Vibration.vibrate([0, 500, 100, 500, 100, 500]);
 
-    // Start countdown for automatic actions
+    
     let timer = 10;
     setCountdown(timer);
     
@@ -51,7 +51,7 @@ export default function PanicButtonScreen() {
       }
     }, 1000);
 
-    // Show immediate alert if not silent
+    
     if (!isSilentMode) {
       Alert.alert(
         "PANIC MODE ACTIVATED",
@@ -71,15 +71,15 @@ export default function PanicButtonScreen() {
   };
 
   const executeEmergencyActions = () => {
-    // 1. Call 911
+    
     Linking.openURL('tel:911');
     
-    // 2. Send SMS to emergency contacts
+    
     const emergencyMessage = encodeURIComponent(
       "PANIC BUTTON ACTIVATED - I NEED IMMEDIATE HELP! This is an emergency alert from the Child Safety App. Please call me or contact authorities. Time: " + new Date().toLocaleString()
     );
     
-    // Mock emergency contacts (in real app, this would come from storage)
+    
     const emergencyContacts = ['+15551234567', '+15552345678'];
     
     emergencyContacts.forEach(contact => {
@@ -88,7 +88,7 @@ export default function PanicButtonScreen() {
       }, 1000);
     });
 
-    // 3. Share location (placeholder)
+    
     setTimeout(() => {
       Alert.alert(
         "Emergency Protocols Executed",
@@ -106,7 +106,7 @@ export default function PanicButtonScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Header */}
+
         <View style={styles.header}>
           <Text style={styles.title}>Panic Button</Text>
           <Text style={styles.subtitle}>
@@ -114,7 +114,7 @@ export default function PanicButtonScreen() {
           </Text>
         </View>
 
-        {/* Silent Mode Toggle */}
+        
         <View style={styles.toggleCard}>
           <View style={styles.toggleHeader}>
             <Ionicons 
@@ -138,7 +138,7 @@ export default function PanicButtonScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Main Panic Button */}
+        
         <View style={styles.panicSection}>
           {!isActivated ? (
             <>
@@ -183,7 +183,7 @@ export default function PanicButtonScreen() {
           )}
         </View>
 
-        {/* Emergency Actions Preview */}
+        
         <View style={styles.actionsCard}>
           <Text style={styles.actionsTitle}>When activated, this will:</Text>
           <View style={styles.actionsList}>
@@ -206,7 +206,7 @@ export default function PanicButtonScreen() {
           </View>
         </View>
 
-        {/* Safety Tips */}
+        
         <View style={styles.tipsCard}>
           <Text style={styles.tipsTitle}>Safety Tips</Text>
           <Text style={styles.tipText}>• Use silent mode when stealth is important</Text>

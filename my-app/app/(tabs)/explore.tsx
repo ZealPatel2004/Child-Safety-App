@@ -1,4 +1,4 @@
-// Onboarding Welcome Card Component
+
 
 function WelcomeCard({ onContinue }: { onContinue: () => void }) {
   return (
@@ -125,11 +125,7 @@ const welcomeStyles = StyleSheet.create({
     fontSize: 17,
   },
 });
-// Example usage: Show WelcomeCard at the top of the screen for demo
-// Remove or conditionally render as needed
-// ...existing code...
-// Inside your AddChildScreen return:
-// <WelcomeCard onContinue={() => {}} />
+import React, { useState } from 'react';
 import React, { useState } from 'react';
 import { addChildProfile } from '../../addChildProfile';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet, Image } from 'react-native';
@@ -168,7 +164,7 @@ export default function AddChildScreen() {
   const [childPhoto, setChildPhoto] = useState<string | null>(null);
 
   const pickImage = async () => {
-    // Request permission
+    
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
     if (permissionResult.granted === false) {
@@ -176,7 +172,7 @@ export default function AddChildScreen() {
       return;
     }
 
-    // Show action sheet for camera or gallery
+    
     Alert.alert(
       'Select Photo',
       'Choose an option',
@@ -263,7 +259,7 @@ export default function AddChildScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
+
         <View style={styles.header}>
           <Text style={styles.title}>
             Add Child Profile
@@ -273,7 +269,7 @@ export default function AddChildScreen() {
           </Text>
         </View>
 
-        {/* Child Avatar Section */}
+
         <View style={styles.card}>
           <View style={styles.avatarSection}>
             <View style={styles.avatar}>
@@ -291,7 +287,7 @@ export default function AddChildScreen() {
           </View>
         </View>
 
-        {/* Child Information Form */}
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Child Information</Text>
           
@@ -348,7 +344,7 @@ export default function AddChildScreen() {
           </View>
         </View>
 
-        {/* Safety Features */}
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Safety Features</Text>
           
@@ -385,7 +381,7 @@ export default function AddChildScreen() {
           </View>
         </View>
 
-        {/* Action Buttons */}
+
         <View style={styles.actionButtons}>
           <TouchableOpacity 
             onPress={handleAddChild}
@@ -405,7 +401,7 @@ export default function AddChildScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Important Notice */}
+
         <View style={styles.noticeCard}>
           <View style={styles.noticeContent}>
             <MaterialIcons name="warning" size={24} color="#F59E0B" />

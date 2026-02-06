@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDeXquQdgx9jH1sGrEt2ts5xXi5wWQC4ek", // Double-check this in your Firebase Console
+  apiKey: "AIzaSyDeXquQdgx9jH1sGrEt2ts5xXi5wWQC4ek",
   authDomain: "mobile-child-safety-app.firebaseapp.com",
   projectId: "mobile-child-safety-app",
   storageBucket: "mobile-child-safety-app.appspot.com",

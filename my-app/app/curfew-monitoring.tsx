@@ -144,7 +144,7 @@ export default function CurfewMonitoringScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#A78BFA" />
@@ -156,7 +156,7 @@ export default function CurfewMonitoringScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        {/* Today's Statistics */}
+
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="analytics" size={24} color="#A78BFA" />
@@ -190,7 +190,7 @@ export default function CurfewMonitoringScreen() {
           </View>
         </View>
 
-        {/* Current Status */}
+        
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="person-pin-circle" size={24} color="#F59E0B" />
@@ -233,7 +233,7 @@ export default function CurfewMonitoringScreen() {
           ))}
         </View>
 
-        {/* Curfew Rules */}
+        
         <View style={styles.card}>
           <View style={styles.sectionHeader}>
             <View style={styles.cardHeader}>
@@ -281,7 +281,7 @@ export default function CurfewMonitoringScreen() {
           </View>
         </View>
 
-        {/* Time Away History */}
+        
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <MaterialIcons name="history" size={24} color="#3B82F6" />
@@ -326,7 +326,7 @@ export default function CurfewMonitoringScreen() {
           </View>
         </View>
 
-        {/* Quick Actions */}
+        
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Quick Actions</Text>
           
@@ -353,7 +353,7 @@ export default function CurfewMonitoringScreen() {
           </View>
         </View>
 
-        {/* Tips */}
+        
         <View style={styles.tipsCard}>
           <View style={styles.tipsHeader}>
             <Ionicons name="bulb" size={24} color="#FCD34D" />

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Linking, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, setDoc } from 'firebase/firestore';
+import app from '../firebaseConfig'; 
 
 interface EmergencyContact {
   id: string;
@@ -56,6 +59,35 @@ export default function EmergencyContactsScreen() {
     isPrimary: false,
     isAvailable24h: false
   });
+  const [addMode, setAddMode] = useState<'primary' | 'other'>('other');
+
+  const uid = "vTwT83nEaWgUkESyAFpC0sBIkM33"; 
+  const db = getFirestore(app);
+
+  
+  React.useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const q = query(collection(db, 'contacts'), where('uid', '==', uid));
+        const querySnapshot = await getDocs(q);
+        const loadedContacts = querySnapshot.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            name: data.name || '',
+            phone: data.phone || '',
+            relationship: data.relationship || '',
+            isPrimary: data.isPrimary || false,
+            isAvailable24h: data.isAvailable24h || false,
+          };
+        });
+        setContacts(loadedContacts);
+      } catch (error) {
+        console.error('Error loading contacts:', error);
+      }
+    };
+    fetchContacts();
+  }, []);
 
   const callContact = (contact: EmergencyContact) => {
     Alert.alert(
@@ -105,7 +137,7 @@ export default function EmergencyContactsScreen() {
             primaryContacts.forEach((contact, index) => {
               setTimeout(() => {
                 Linking.openURL(`tel:${contact.phone}`);
-              }, index * 2000); // 2 second delay between calls
+              }, index * 2000);
             });
           },
           style: 'destructive'
@@ -114,59 +146,103 @@ export default function EmergencyContactsScreen() {
     );
   };
 
-  const shareLocation = () => {
-    Alert.alert(
-      'Share Location',
-      'This feature will share your current location with all emergency contacts.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Share', 
-          onPress: () => {
-            // In a real app, this would get actual location and send it
-            const message = "EMERGENCY: I need help! Here is my location: [Location will be shared automatically] - Child Safety App";
-            contacts.forEach(contact => {
-              Linking.openURL(`sms:${contact.phone}?body=${encodeURIComponent(message)}`);
-            });
-          }
-        }
-      ]
-    );
-  };
+  const shareLocation = async () => {
+    
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Location permission is required to share your location.');
+      return;
+    }
 
-  const addContact = () => {
+    
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    const mapsUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
+    const message = `EMERGENCY: I need help! Here is my location: ${mapsUrl} - Child Safety App`;
+
+    
+    contacts.filter(c => c.isPrimary).forEach(contact => {
+      Linking.openURL(`sms:${contact.phone}?body=${encodeURIComponent(message)}`);
+    });
+
+    
+    try {
+      await setDoc(doc(db, 'shared_locations', uid), {
+        latitude,
+        longitude,
+        timestamp: new Date().toISOString(),
+      });
+      
+    } catch (error) {
+      console.error('Error sharing location to Firestore:', error);
+      Alert.alert('Error', 'Failed to share location to backend.');
+    }
+  };
+  const addContact = async () => {
     if (!newContact.name || !newContact.phone || !newContact.relationship) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
-    const contact: EmergencyContact = {
-      id: Date.now().toString(),
-      ...newContact
+    
+    let isPrimary = newContact.isPrimary;
+    
+    if (
+      newContact.isPrimary === false &&
+      
+      
+      true
+    ) {
+      isPrimary = false;
+    }
+
+    const contact = {
+      name: newContact.name || '',
+      phone: newContact.phone || '',
+      relationship: newContact.relationship || '',
+      isPrimary: typeof isPrimary === 'boolean' ? isPrimary : false,
+      isAvailable24h: typeof newContact.isAvailable24h === 'boolean' ? newContact.isAvailable24h : false,
+      uid: uid || '',
     };
 
-    setContacts([...contacts, contact]);
-    setNewContact({
-      name: '',
-      phone: '',
-      relationship: '',
-      isPrimary: false,
-      isAvailable24h: false
-    });
-    setShowAddModal(false);
-    Alert.alert('Success', 'Emergency contact added successfully!');
+    try {
+      const docRef = await addDoc(collection(db, 'contacts'), contact);
+      setContacts([...contacts, { ...contact, id: docRef.id }]);
+      setNewContact({
+        name: '',
+        phone: '',
+        relationship: '',
+        isPrimary: false,
+        isAvailable24h: false
+      });
+      setShowAddModal(false);
+      Alert.alert('Success', 'Emergency contact added successfully!');
+    } catch (error) {
+      console.error('Add contact error:', error);
+      const errMsg = (error && (error as any).message) ? (error as any).message : 'Unknown error';
+      Alert.alert('Error', 'Failed to add contact: ' + errMsg);
+    }
   };
 
-  const deleteContact = (id: string) => {
+  const deleteContact = async (id: string) => {
     Alert.alert(
       'Delete Contact',
       'Are you sure you want to remove this emergency contact?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
-          onPress: () => setContacts(contacts.filter(c => c.id !== id))
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, 'contacts', id));
+              setContacts(contacts.filter(c => c.id !== id));
+            } catch (error) {
+              console.error('Delete contact error:', error);
+              const errMsg = (error && (error as any).message) ? (error as any).message : 'Unknown error';
+              Alert.alert('Error', 'Failed to delete contact: ' + errMsg);
+            }
+          }
         }
       ]
     );
@@ -175,13 +251,13 @@ export default function EmergencyContactsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
+        
         <View style={styles.header}>
           <Text style={styles.title}>Emergency Contacts</Text>
           <Text style={styles.subtitle}>Quick access to people who can help you</Text>
         </View>
 
-        {/* Emergency Actions */}
+        
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Emergency Actions</Text>
           <View style={styles.emergencyActions}>
@@ -203,61 +279,106 @@ export default function EmergencyContactsScreen() {
           </View>
         </View>
 
-        {/* Primary Contacts */}
+        
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Primary Contacts</Text>
-          <Text style={styles.cardSubtitle}>These contacts will be called first in emergencies</Text>
           
-          {contacts.filter(c => c.isPrimary).map((contact) => (
-            <View key={contact.id} style={styles.contactItem}>
-              <View style={styles.contactInfo}>
-                <View style={styles.contactHeader}>
-                  <Text style={styles.contactName}>{contact.name}</Text>
-                  <View style={styles.badges}>
-                    {contact.isAvailable24h && (
-                      <View style={[styles.badge, { backgroundColor: '#10B981' }]}>
-                        <Text style={styles.badgeText}>24/7</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.cardTitle}>Primary Contacts</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => {
+                setNewContact({
+                  name: '',
+                  phone: '',
+                  relationship: '',
+                  isPrimary: true,
+                  isAvailable24h: false,
+                });
+                setAddMode('primary');
+                setShowAddModal(true);
+              }}
+            >
+              <Ionicons name="add" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.cardSubtitle}>
+            These contacts will be called first in emergencies
+          </Text>
+
+          
+          {contacts.filter(c => c.isPrimary).length === 0 ? (
+            <Text style={{ color: '#94A3B8', marginTop: 8 }}>
+              No primary contacts yet. Tap + to add one.
+            </Text>
+          ) : (
+            contacts.filter(c => c.isPrimary).map((contact) => (
+              <View key={contact.id} style={styles.contactItem}>
+                <View style={styles.contactInfo}>
+                  <View style={styles.contactHeader}>
+                    <Text style={styles.contactName}>
+                      {contact.name}
+                      {contact.relationship ? (
+                        <Text style={{ color: '#A78BFA', fontWeight: '400', fontSize: 15 }}>
+                          {' '}({contact.relationship})
+                        </Text>
+                      ) : null}
+                    </Text>
+                    <View style={styles.badges}>
+                      {contact.isAvailable24h && (
+                        <View style={[styles.badge, { backgroundColor: '#10B981' }]}> 
+                          <Text style={styles.badgeText}>24/7</Text>
+                        </View>
+                      )}
+                      <View style={[styles.badge, { backgroundColor: '#3B82F6' }]}> 
+                        <Text style={styles.badgeText}>PRIMARY</Text>
                       </View>
-                    )}
-                    <View style={[styles.badge, { backgroundColor: '#3B82F6' }]}>
-                      <Text style={styles.badgeText}>PRIMARY</Text>
                     </View>
                   </View>
+                  <Text style={styles.contactDetails}>{contact.phone}</Text>
                 </View>
-                <Text style={styles.contactDetails}>{contact.relationship} • {contact.phone}</Text>
+                <View style={styles.contactActions}>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#10B981' }]}
+                    onPress={() => callContact(contact)}
+                  >
+                    <Ionicons name="call" size={18} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
+                    onPress={() => sendMessage(contact)}
+                  >
+                    <Ionicons name="chatbubble" size={18} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
+                    onPress={() => deleteContact(contact.id)}
+                  >
+                    <Ionicons name="trash" size={18} color="white" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              
-              <View style={styles.contactActions}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: '#10B981' }]}
-                  onPress={() => callContact(contact)}
-                >
-                  <Ionicons name="call" size={18} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
-                  onPress={() => sendMessage(contact)}
-                >
-                  <Ionicons name="chatbubble" size={18} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
-                  onPress={() => deleteContact(contact.id)}
-                >
-                  <Ionicons name="trash" size={18} color="white" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
 
-        {/* Other Contacts */}
+        
         <View style={styles.card}>
           <View style={styles.sectionHeader}>
             <Text style={styles.cardTitle}>Other Emergency Contacts</Text>
             <TouchableOpacity 
               style={styles.addButton}
-              onPress={() => setShowAddModal(true)}
+              onPress={() => {
+                setNewContact({
+                  name: '',
+                  phone: '',
+                  relationship: '',
+                  isPrimary: false,
+                  isAvailable24h: false,
+                });
+                setAddMode('other');
+                setShowAddModal(true);
+              }}
             >
               <Ionicons name="add" size={24} color="#3B82F6" />
             </TouchableOpacity>
@@ -267,14 +388,16 @@ export default function EmergencyContactsScreen() {
             <View key={contact.id} style={styles.contactItem}>
               <View style={styles.contactInfo}>
                 <View style={styles.contactHeader}>
-                  <Text style={styles.contactName}>{contact.name}</Text>
+                  <Text style={styles.contactName}>
+                    {contact.name}{contact.relationship ? ` (${contact.relationship})` : ''}
+                  </Text>
                   {contact.isAvailable24h && (
                     <View style={[styles.badge, { backgroundColor: '#10B981' }]}>
                       <Text style={styles.badgeText}>24/7</Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.contactDetails}>{contact.relationship} • {contact.phone}</Text>
+                <Text style={styles.contactDetails}>{contact.phone}</Text>
               </View>
               
               <View style={styles.contactActions}>
@@ -301,7 +424,7 @@ export default function EmergencyContactsScreen() {
           ))}
         </View>
 
-        {/* Safety Tips */}
+        
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Emergency Contact Tips</Text>
           <View style={styles.tipsList}>
@@ -325,7 +448,7 @@ export default function EmergencyContactsScreen() {
         </View>
       </ScrollView>
 
-      {/* Add Contact Modal */}
+      
       <Modal
         visible={showAddModal}
         animationType="slide"
@@ -372,17 +495,20 @@ export default function EmergencyContactsScreen() {
             </View>
 
             <View style={styles.checkboxGroup}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => setNewContact({...newContact, isPrimary: !newContact.isPrimary})}
-              >
-                <Ionicons 
-                  name={newContact.isPrimary ? "checkbox" : "square-outline"} 
-                  size={24} 
-                  color="#3B82F6" 
-                />
-                <Text style={styles.checkboxLabel}>Make this a primary contact</Text>
-              </TouchableOpacity>
+
+              {addMode === 'primary' && (
+                <TouchableOpacity 
+                  style={styles.checkbox}
+                  onPress={() => setNewContact({...newContact, isPrimary: !newContact.isPrimary})}
+                >
+                  <Ionicons 
+                    name={newContact.isPrimary ? "checkbox" : "square-outline"} 
+                    size={24} 
+                    color="#3B82F6" 
+                  />
+                  <Text style={styles.checkboxLabel}>Make this a primary contact</Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity 
                 style={styles.checkbox}

@@ -1,4 +1,3 @@
-// Firebase service file for accessing Firebase features
 import app from './firebaseConfig';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';

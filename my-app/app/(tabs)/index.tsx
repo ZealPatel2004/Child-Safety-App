@@ -33,7 +33,7 @@ export default function HomeScreen() {
   };
 
   const handleSafetyLocations = () => {
-    // Navigate to safety locations screen
+    
     router.push('/safety-locations');
   };
 
@@ -63,7 +63,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
+        
         <View style={styles.header}>
           <Text style={styles.title}>
             Child Safety
@@ -73,7 +73,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* Emergency Call 911 Button */}
+
         <TouchableOpacity 
           onPress={handleCall911}
           style={styles.emergencyButton}
@@ -87,7 +87,7 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Place a Call to NCMEC */}
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>
             Place a Call to National Center for Missing & Exploited Children
@@ -104,7 +104,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Quick Actions */}
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Quick Actions</Text>
           

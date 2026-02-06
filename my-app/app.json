@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.childsafety.app"
+      "bundleIdentifier": "com.childsafety.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to share it with emergency contacts in case of an emergency."
+      }
     },
     "android": {
       "adaptiveIcon": {

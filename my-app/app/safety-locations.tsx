@@ -65,7 +65,7 @@ export default function SafetyLocationsScreen() {
     }
   ];
 
-  // Initialize mock data
+  
   React.useEffect(() => {
     setSafeLocations(mockSafeLocations);
   }, []);
@@ -73,7 +73,7 @@ export default function SafetyLocationsScreen() {
   const getCurrentLocation = async () => {
     try {
       setLoading(true);
-      // For now, show a placeholder message
+      
       Alert.alert(
         'Location Feature',
         'Location services will be enabled in the next update. For now, showing nearby safe places based on common locations.',
@@ -144,13 +144,13 @@ export default function SafetyLocationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
+        
         <View style={styles.header}>
           <Text style={styles.title}>Safety Locations</Text>
           <Text style={styles.subtitle}>Find nearby safe places and emergency services</Text>
         </View>
 
-        {/* Emergency Actions */}
+        
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Emergency Actions</Text>
           <View style={styles.actionButtons}>
@@ -172,7 +172,7 @@ export default function SafetyLocationsScreen() {
           </View>
         </View>
 
-        {/* Current Location */}
+        
         <View style={styles.card}>
           <View style={styles.locationHeader}>
             <Text style={styles.cardTitle}>Your Location</Text>
@@ -192,7 +192,7 @@ export default function SafetyLocationsScreen() {
           </View>
         </View>
 
-        {/* Safe Locations List */}
+       
         <View style={styles.card}>
           <View style={styles.locationHeader}>
             <Text style={styles.cardTitle}>Nearby Safe Places</Text>
@@ -245,7 +245,7 @@ export default function SafetyLocationsScreen() {
           </View>
         </View>
 
-        {/* Safety Tips */}
+        
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Safety Tips</Text>
           <View style={styles.tipsList}>

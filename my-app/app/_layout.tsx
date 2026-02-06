@@ -15,5 +15,5 @@ export default function RootLayout() {
       <StatusBar style="auto" />
     </>
   );
-// ...existing code ends here
+
 }
