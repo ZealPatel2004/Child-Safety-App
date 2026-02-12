@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Linking, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Linking, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, setDoc } from 'firebase/firestore';
 import app from '../firebaseConfig'; 
+
+const formatTimestamp = (value: Date | null) => {
+  if (!value) {
+    return 'Never';
+  }
+  const month = `${value.getMonth() + 1}`.padStart(2, '0');
+  const day = `${value.getDate()}`.padStart(2, '0');
+  const year = value.getFullYear();
+  let hours = value.getHours();
+  const minutes = `${value.getMinutes()}`.padStart(2, '0');
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${month}/${day}/${year} ${hours}:${minutes} ${suffix}`;
+};
 
 interface EmergencyContact {
   id: string;
@@ -60,9 +74,14 @@ export default function EmergencyContactsScreen() {
     isAvailable24h: false
   });
   const [addMode, setAddMode] = useState<'primary' | 'other'>('other');
+  const [lastSharedAt, setLastSharedAt] = useState<Date | null>(null);
+  const [isSharingActive, setIsSharingActive] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const uid = "vTwT83nEaWgUkESyAFpC0sBIkM33"; 
   const db = getFirestore(app);
+  const lastSharedLabel = React.useMemo(() => formatTimestamp(lastSharedAt), [lastSharedAt]);
 
   
   React.useEffect(() => {
@@ -147,35 +166,49 @@ export default function EmergencyContactsScreen() {
   };
 
   const shareLocation = async () => {
-    
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Location permission is required to share your location.');
+    if (isRefreshing) {
       return;
     }
 
-    
-    let location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-    const mapsUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
-    const message = `EMERGENCY: I need help! Here is my location: ${mapsUrl} - Child Safety App`;
+    setIsRefreshing(true);
+    setShareError(null);
 
-    
-    contacts.filter(c => c.isPrimary).forEach(contact => {
-      Linking.openURL(`sms:${contact.phone}?body=${encodeURIComponent(message)}`);
-    });
-
-    
     try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        const message = 'Location permission is required to share your location.';
+        setShareError(message);
+        setIsSharingActive(false);
+        Alert.alert('Permission Denied', message);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      const mapsUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
+      const message = `EMERGENCY: I need help! Here is my location: ${mapsUrl} - Child Safety App`;
+
+      contacts.filter(c => c.isPrimary).forEach(contact => {
+        Linking.openURL(`sms:${contact.phone}?body=${encodeURIComponent(message)}`);
+      });
+
       await setDoc(doc(db, 'shared_locations', uid), {
         latitude,
         longitude,
         timestamp: new Date().toISOString(),
       });
-      
+
+      setIsSharingActive(true);
+      setLastSharedAt(new Date());
+      setShareError(null);
     } catch (error) {
-      console.error('Error sharing location to Firestore:', error);
+      console.error('Error sharing location:', error);
+      setIsSharingActive(false);
+      const fallbackMessage = 'Failed to share location. Please try again.';
+      setShareError(fallbackMessage);
       Alert.alert('Error', 'Failed to share location to backend.');
+    } finally {
+      setIsRefreshing(false);
     }
   };
   const addContact = async () => {
@@ -257,6 +290,42 @@ export default function EmergencyContactsScreen() {
           <Text style={styles.subtitle}>Quick access to people who can help you</Text>
         </View>
 
+        {shareError ? (
+          <View style={styles.errorBanner}>
+            <Ionicons name="warning" size={20} color="#FBBF24" />
+            <Text style={styles.errorText}>{shareError}</Text>
+            <TouchableOpacity style={styles.errorDismiss} onPress={() => setShareError(null)}>
+              <Ionicons name="close" size={18} color="#FBBF24" />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <View style={styles.statusHeaderRow}>
+            <Text style={styles.cardTitle}>Location Sharing</Text>
+            <View style={[styles.statusPill, isSharingActive ? styles.statusPillOn : styles.statusPillOff]}>
+              <View style={[styles.statusDot, isSharingActive ? styles.statusDotOn : styles.statusDotOff]} />
+              <Text style={styles.statusLabel}>{isSharingActive ? 'On' : 'Off'}</Text>
+            </View>
+          </View>
+          <View style={styles.statusDetailsRow}>
+            <Ionicons name="time-outline" size={18} color="#A78BFA" />
+            <Text style={styles.statusDetailsText}>Last update: {lastSharedLabel}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.refreshButton, isRefreshing && styles.refreshButtonDisabled]}
+            onPress={shareLocation}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Ionicons name="refresh" size={18} color="#FFFFFF" />
+            )}
+            <Text style={styles.refreshButtonText}>{isRefreshing ? 'Updating...' : 'Manual Refresh'}</Text>
+          </TouchableOpacity>
+        </View>
+
         
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Emergency Actions</Text>
@@ -270,11 +339,20 @@ export default function EmergencyContactsScreen() {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.emergencyButton, { backgroundColor: '#F97316' }]}
+              style={[
+                styles.emergencyButton,
+                { backgroundColor: '#F97316' },
+                isRefreshing && styles.emergencyButtonDisabled,
+              ]}
               onPress={shareLocation}
+              disabled={isRefreshing}
             >
-              <Ionicons name="location" size={24} color="white" />
-              <Text style={styles.emergencyButtonText}>Share Location</Text>
+              {isRefreshing ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Ionicons name="location" size={24} color="white" />
+              )}
+              <Text style={styles.emergencyButtonText}>{isRefreshing ? 'Sending...' : 'Share Location'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -775,5 +853,98 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '700',
+  },
+  statusHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+  },
+  statusPillOn: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: '#10B981',
+  },
+  statusPillOff: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: '#EF4444',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusDotOn: {
+    backgroundColor: '#10B981',
+  },
+  statusDotOff: {
+    backgroundColor: '#EF4444',
+  },
+  statusLabel: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.3,
+  },
+  statusDetailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  statusDetailsText: {
+    color: '#E2E8F0',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#312E81',
+    borderRadius: 14,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#4338CA',
+  },
+  refreshButtonDisabled: {
+    opacity: 0.6,
+  },
+  refreshButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    marginBottom: 16,
+  },
+  errorText: {
+    flex: 1,
+    color: '#FECACA',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  errorDismiss: {
+    padding: 4,
+  },
+  emergencyButtonDisabled: {
+    opacity: 0.6,
   },
 });

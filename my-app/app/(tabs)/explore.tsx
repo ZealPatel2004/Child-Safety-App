@@ -125,7 +125,7 @@ const welcomeStyles = StyleSheet.create({
     fontSize: 17,
   },
 });
-import React, { useState } from 'react';
+  // ...existing code...
 import React, { useState } from 'react';
 import { addChildProfile } from '../../addChildProfile';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, StyleSheet, Image } from 'react-native';
